@@ -6,7 +6,7 @@ function getUser(userData) {
     else {
         $("#logout").show();
         $("#upload").show();
-
+        $("#photos").show();
     }
 }
 
@@ -19,7 +19,6 @@ function getPhotos(photosData) {
         var photo = photosData[i];
         var elem = $("<img>");
         elem.attr("src", photo.filename);
-
         $("#photos").append(elem);
     }
 }

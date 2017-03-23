@@ -1,6 +1,7 @@
 package com.theironyard.novauc.entities;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 /**
@@ -28,7 +29,9 @@ public class Photo {
 
 
     @Column(nullable= false)
-    LocalTime viewedTime;
+    int seconds;
+
+
 
     @Column(nullable = false)
     Boolean isPublic;
@@ -36,22 +39,29 @@ public class Photo {
     @Column(nullable = false)
     Long finishedTime;
 
-    public Photo(User sender, User recipient, String filename, String originalFilename, LocalTime viewedTime, Boolean isPublic, Long finishedTime) {
+
+
+    public Photo(User sender, User recipient, String filename, String originalFilename,  Boolean isPublic, int seconds) {
         this.sender = sender;
         this.recipient = recipient;
         this.originalFilename = originalFilename;
         this.filename = filename;
-        this.viewedTime = viewedTime;
+       this.seconds = seconds;
+
         this.isPublic = isPublic;
-        this.finishedTime = finishedTime;
+
     }
 
     public Photo() {
     }
 
+    public int getSeconds() {
+        return seconds;
+    }
 
-
-
+    public void setSeconds(int seconds) {
+        this.seconds = seconds;
+    }
 
     public int getId() {
         return id;
@@ -65,20 +75,14 @@ public class Photo {
         return sender;
     }
 
+
+
     public void setSender(User sender) {
         this.sender = sender;
     }
 
     public User getRecipient() {
         return recipient;
-    }
-
-    public LocalTime getViewedTime() {
-        return viewedTime;
-    }
-
-    public void setViewedTime(LocalTime viewedTime) {
-        this.viewedTime = viewedTime;
     }
 
     public Boolean getPublic() {
@@ -89,13 +93,6 @@ public class Photo {
         isPublic = isPublic;
     }
 
-    public Long getFinishedTime() {
-        return finishedTime;
-    }
-
-    public void setFinishedTime(Long finishedTime) {
-        this.finishedTime = finishedTime;
-    }
 
     public void setRecipient(User recipient) {
         this.recipient = recipient;

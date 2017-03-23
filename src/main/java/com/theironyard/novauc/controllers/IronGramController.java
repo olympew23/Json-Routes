@@ -24,8 +24,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -42,8 +46,7 @@ public class IronGramController {
     PhotoRepository photos;
 
 
-
-  Server dbui = null;
+    Server dbui = null;
 
     @PostConstruct
     public void init() throws SQLException {
@@ -61,8 +64,7 @@ public class IronGramController {
         if (user == null) {
             user = new User(username, PasswordStorage.createHash(password));
             users.save(user);
-        }
-        else if (!PasswordStorage.verifyPassword(password, user.getPassword())) {
+        } else if (!PasswordStorage.verifyPassword(password, user.getPassword())) {
             throw new Exception("Wrong password");
         }
         session.setAttribute("username", username);
@@ -83,7 +85,6 @@ public class IronGramController {
     }
 
 
-
     @RequestMapping("/upload")
     public Photo upload(
             HttpSession session,
@@ -91,7 +92,7 @@ public class IronGramController {
             String receiver,
             MultipartFile photo,
             Boolean isPublic,
-            Long finishedTime
+            int time
     ) throws Exception {
         String username = (String) session.getAttribute("username");
         if (username == null) {
@@ -116,7 +117,7 @@ public class IronGramController {
         p.setSender(senderUser);
         p.setRecipient(receiverUser);
         p.setFilename(photoFile.getName());
-        p.setFinishedTime(finishedTime);
+        p.setSeconds(time);
         p.setPublic(isPublic);
         photos.save(p);
 
@@ -124,6 +125,7 @@ public class IronGramController {
 
         return p;
     }
+
     @RequestMapping("/photos")
     public List<Photo> showPhotos(HttpSession session) throws Exception {
         String username = (String) session.getAttribute("username");
@@ -132,38 +134,40 @@ public class IronGramController {
         }
 
         User user = users.findFirstByName(username);
-        List<Photo> allPhotos = (List<Photo>) photos.findAll();
-
-
-        for(Photo photo: allPhotos) {
-            if(photo.getFinishedTime() == null) {
-                photo.setFinishedTime((long) 25);
-            }
-        }
-
-
-        for (Photo photo : allPhotos){
-            if(photo.getViewedTime() == null){
-                photo.setViewedTime(LocalTime.now());
-                photos.save(photo);
-            }
-
-
-            if(LocalTime.now().isAfter(photo.getViewedTime().plusSeconds(photo.getFinishedTime()))){
-                File deletePhoto = new File("public/"+photo.getFilename());
-                photos.delete(photo);
-            }
-        }
-
         return photos.findByRecipient(user);
     }
 
-    @RequestMapping(path = "/public-photos", method = RequestMethod.GET)
-    public Iterable<Photo> json(HttpSession session){
-        String username = (String) session.getAttribute("userName");
-        User sender = users.findFirstByName(username);
-        return photos.findByIsPublic(sender);
+   public synchronized void deletePhoto(Photo photo){
+
+
+    Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+
+        public void run() {
+
+        }
+
+
+    };
+        timer.schedule(task, photo.getSeconds() * 10000);
+
+
+}
+
+public void delete(Photo photo){
+        photos.delete(photo.getId());
+        File photofile = new File("/public" + photo.getFilename());
+        photos.delete(photo);
     }
+
+    @RequestMapping(path = "/public-photos", method = RequestMethod.GET)
+        public Iterable<Photo> json(HttpSession session) {
+            String username = (String) session.getAttribute("userName");
+            User sender = users.findFirstByName(username);
+            return photos.findByIsPublic(sender);
+        }
+
+
     }
 
 
