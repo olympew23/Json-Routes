@@ -144,7 +144,7 @@ public class IronGramController {
     TimerTask task = new TimerTask() {
 
         public void run() {
-
+            delete(photo);
         }
 
 
@@ -164,7 +164,7 @@ public void delete(Photo photo){
         public Iterable<Photo> json(HttpSession session) {
             String username = (String) session.getAttribute("userName");
             User sender = users.findFirstByName(username);
-            return photos.findByIsPublic(sender);
+        return photos.findByRecipient(sender);
         }
 
 
